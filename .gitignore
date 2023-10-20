@@ -1,6 +1,9 @@
 #VSCode
 .vscode
 
+# Preparations folders
+prep
+
 # Prerequisites
 *.d
 
