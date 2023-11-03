@@ -2,6 +2,7 @@
 #include <cassert>
 #include <string>
 #include <stack>
+#include <cstddef>
 
 bool isOperator(const char c)
 {
@@ -70,16 +71,17 @@ struct Point {
 
 int lab[labSize][labSize] = {0, 1, 0, 0, 0,
                              0, 1, 0, 0, 0,
-                             0, 0, 0, 0, 0,
-                             0, 1, 1, 1, 0,
-                             0, 0, 0, 1, 0};
+                             0, 0, 0, 1, 0,
+                             0, 1, 1, 1, 1,
+                             0, 0, 0, 0, 0};
 const int LAB_EMPTY = 0;
 const int LAB_WALL = 1;
+const int LAB_TEMP_WALL = 2;
 
 bool hasRoute(const Point &start, const Point& end, int lab[][labSize]) {
     std::stack<Point> route;
     route.push(start);
-    lab[start.row][start.col] = LAB_WALL;
+    lab[start.row][start.col] = LAB_TEMP_WALL;
 
     const Point directions[] = {
         Point(0, 1),            // down
@@ -93,16 +95,32 @@ bool hasRoute(const Point &start, const Point& end, int lab[][labSize]) {
         if(current == end) {
             break;
         }
-        route.pop();
 
+        lab[current.row][current.col] = LAB_TEMP_WALL;
+
+        bool found = false;
         for(std::size_t i = 0; i < 4; ++ i) {
             const Point next = current + directions[i];
             if(next.checkBounds() && lab[next.row][next.col] == LAB_EMPTY) {
-                lab[next.row][next.col] = LAB_WALL;
+                // lab[next.row][next.col] = LAB_TEMP_WALL;
                 route.push(next);
+                found = true;
+                break;
             }
         }
-        
+
+        if (!found) {
+            route.pop();
+        }   
+    }
+
+    // Fix lab
+    for (std::size_t i = 0; i < labSize; ++i) {
+        for (std::size_t j = 0; j < labSize; ++j) {
+            if (lab[i][j] == LAB_TEMP_WALL) {
+                lab[i][j] = LAB_EMPTY;
+            }
+        }
     }
 
     if(route.empty()) return false;
