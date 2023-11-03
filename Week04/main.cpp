@@ -30,23 +30,25 @@ Node* findMiddle(Node* head) {
     return slow;
 }
 
+void makeRange(Node*& first) {
+    Node *rangeBegin = first;
+    Node *rangeEnd = first->next;
+    for(int i = first->data + 1; i < rangeEnd->data; i++){
+        rangeBegin->next = new Node{i, nullptr};
+        rangeBegin = rangeBegin->next;
+    }
+    rangeBegin->next = rangeEnd;
+    first = rangeEnd;
+}
 
 void fillGaps(Node *first){
     if(first == nullptr || first->next == nullptr){
         return;
     }
     while(first->next != nullptr){
-        if(first->data < first->next->data - 1){
-            //makeRange()
-            Node *rangeBegin = first;
-            Node *rangeEnd = first->next;
-            for(int i = first->data + 1; i < rangeEnd->data; i++){
-                rangeBegin->next = new Node{i, nullptr};
-                rangeBegin = rangeBegin->next;
-            }
-            rangeBegin->next = rangeEnd;
-            first = rangeEnd;
-        }else{
+        if(first->data < first->next->data - 1) {
+            makeRange(first);
+        } else{
             first = first->next;
         }
     }
