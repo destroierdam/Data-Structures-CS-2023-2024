@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <cstddef>
+#include <functional>
 
 template <typename T>
 class BinTree {
@@ -24,6 +26,31 @@ public:
 	}
 	~BinTree() {
 		this->destroy();
+	}
+
+	std::size_t count() const {
+		return countHelper(this->root);
+	}
+
+	std::size_t countEvens() const {
+		return this->countEvensHelper(this->root);
+	}
+
+	std::size_t searchCount(std::function<bool(const T&)> pred) const {
+		// return this->searchCountHelper(pred, this->root);
+		return this->_searchCount(
+			[pred](Node* node) -> bool { return pred(node->data); },
+			this->root
+		);
+	}
+
+	std::size_t height() const {
+		return this->heightHelper(this->root);
+	}
+	std::size_t countLeaves() const {
+		return this->_searchCount(
+			[](Node* node) -> bool { return node->left == nullptr && node->right == nullptr; },
+			this->root);
 	}
 
 private:
@@ -66,6 +93,39 @@ private:
 		// Now both subtrees have been deleted
 		std::clog << "Deleting node with data " << current->data << "\n";
 		delete current;
+	}
+
+	std::size_t countHelper(Node* node) const {
+		if (node == nullptr) {
+			return 0;
+		}
+		return 1 + this->countHelper(node->left) + this->countHelper(node->right);
+	}
+	std::size_t countEvensHelper(Node* node) const {
+		if (node == nullptr) {
+			return 0;
+		}
+		// std::cout << node->data << " - " << (node->data % 2 == 0 ? 1 : 0) << "\n";
+		return (node->data % 2 == 0 ? 1 : 0) + this->countEvensHelper(node->left) + this->countEvensHelper(node->right);
+		 // ? 1 : 0  can be ommitted
+	}
+	std::size_t _searchCount(std::function<bool(Node*)> pred, Node* node) const {
+		if (node == nullptr) {
+			return 0;
+		}
+		return pred(node) + this->_searchCount(pred, node->left) + this->_searchCount(pred, node->right);
+	}
+	std::size_t searchCountHelper(std::function<bool(const T&)> pred, Node* node) const {
+		if (node == nullptr) {
+			return 0;
+		}
+		return pred(node->data) + this->searchCountHelper(pred, node->left) + this->searchCountHelper(pred, node->right);
+	}
+	std::size_t heightHelper(Node* node) const {
+		if (node == nullptr) {
+			return 0;
+		}
+		return 1 + std::max(this->heightHelper(node->left), this->heightHelper(node->right));
 	}
 
 private:
